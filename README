@@ -1,0 +1,14 @@
+PageUtils
+=========
+
+David Houghton
+27 November 2011
+
+Some useful javascript functions wrapped in their own object to provide a namespace.
+I wrote these to provide footnotes, tables of contents, and similar scaffolding for
+my own site, then decided to share them as an open source github project.
+
+License
+-------
+
+This code is available under the LGPL.
