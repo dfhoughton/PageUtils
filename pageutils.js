@@ -18,6 +18,7 @@ var dfh = {
 		this.toc();
 		this.footnotes();
 		this.mdash();
+		this.elinks();
 		this.version();
 	},
 
@@ -162,11 +163,11 @@ var dfh = {
 					}
 					for (i = 0; i < n.attributes.length; i++) {
 						var a = n.attributes[i];
-						// webkit hack
-						// for some reason, this only works if I test the regex twice
-						// for node values
-						regex.test(a.nodeValue);
-						if (regex.test(a.nodeValue)) {
+						// hack
+						// for some reason, this only works for Firefox if I use
+						// an in-line regex; webkit required me to test the
+						// expression twice but otherwise worked
+						if (/__VERSION__/g.test(a.nodeValue)) {
 							a.nodeValue = a.nodeValue.replace(regex, version);
 						}
 					}
@@ -277,9 +278,8 @@ var dfh = {
 	},
 
 	/**
-	 * we look for -- and replace it with an em dash
-	 * except in pre and code elements
-	 * only -- is transformed, not ---, etc.
+	 * we look for -- and replace it with an em dash except in pre and code
+	 * elements only -- is transformed, not ---, etc.
 	 */
 	mdash : function() {
 		var walker = document.createTreeWalker(document.body,
@@ -298,4 +298,26 @@ var dfh = {
 			}
 		}
 	},
+
+	/**
+	 * Makes all external links open in a new window.
+	 */
+	elinks : function(pattern) {
+		console.log("looking for external links");
+		if (pattern == undefined) {
+			pattern = /^https?:\/\//i;
+		} else if (typeof (pattern) == 'string') {
+			pattern = new RegExp(pattern);
+		}
+		var walker = document.createTreeWalker(document.body,
+				NodeFilter.SHOW_ELEMENT, null, false);
+		while (walker.nextNode()) {
+			if (walker.currentNode.tagName == 'A') {
+				var n = walker.currentNode;
+				if (pattern.test(n.getAttribute("href"))) {
+					n.setAttribute("target", "_blank");
+				}
+			}
+		}
+	}
 };
