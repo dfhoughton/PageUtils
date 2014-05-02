@@ -168,8 +168,8 @@ dfh.version = function() {
 					// for some reason, this only works for Firefox if I use
 					// an in-line regex; webkit required me to test the
 					// expression twice but otherwise worked
-					if (/__VERSION__/g.test(a.nodeValue)) {
-						a.nodeValue = a.nodeValue.replace(regex, version);
+					if (/__VERSION__/g.test(a.value)) {
+						a.value = a.value.replace(regex, version);
 					}
 				}
 			}
