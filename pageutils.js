@@ -304,7 +304,6 @@ dfh.mdash = function() {
  * Makes all external links open in a new window.
  */
 dfh.elinks = function(pattern) {
-	console.log("looking for external links");
 	if (pattern == undefined) {
 		pattern = /^https?:\/\//i;
 	} else if (typeof (pattern) == 'string') {
