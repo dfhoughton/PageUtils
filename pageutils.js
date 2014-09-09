@@ -16,12 +16,12 @@ var dfh = dfh || {};
  *            page naming base
  */
 dfh.prepare = function(self, base) {
-	this.headers(self, base);
-	this.toc();
-	this.footnotes();
-	this.mdash();
-	this.elinks();
-	this.version();
+   this.headers(self, base);
+   this.toc();
+   this.footnotes();
+   this.mdash();
+   this.elinks();
+   this.version();
 };
 
 /**
@@ -29,7 +29,7 @@ dfh.prepare = function(self, base) {
  * 
  * 1) You create a style sheet with 3 styles
  * 
- * a) a.fn { display:none; ... } for the footnotes you write in-line
+ * a) .fn { display:none } for the footnotes you write in-line
  * 
  * b) a.footnote { font-size: small; ... } for the footnotes automatically
  * created by this script
@@ -50,55 +50,54 @@ dfh.prepare = function(self, base) {
  * the body element, so they will appear last.
  * 
  * Provided you have linked this script to the page it will modify the page
- * contents, replacing your invisible footnote anchor elements with links to
+ * contents, replacing your invisible footnote elements with links to
  * appropriate elements in the footnote section and vice versa. If it finds no
  * footnotes on the page, it will delete the footnotes section.
  */
 dfh.footnotes = function() {
-	var fnSection = document.getElementById("footnotes");
-	var fnsExists = fnSection && 1;
-	if (!fnsExists) {
-		fnSection = document.createElement('div');
-		fnSection.setAttribute('id', 'footnotes');
-	}
-	var fns = document.getElementsByClassName("fn");
-	// copy items to new array that won't be dynamically altered
-	var ar = new Array();
-	var len = fns.length;
-	for ( var i = 0; i < len; i++) {
-		var span = fns[i];
-		ar[i] = span;
-	}
-	var found = false;
-	var index = 1;
-	for ( var i = 0; i < len; i++) {
-		var span = ar[i];
-		if (span.nodeName == 'SPAN') {
-			found = true;
-			span.removeAttribute('class');
-			var bname = 'fn' + index + '_bottom';
-			var tname = 'fn' + index + '_top';
-			var topA = document.createElement("a");
-			topA.setAttribute('href', '#' + bname);
-			topA.setAttribute('name', tname);
-			topA.setAttribute('class', 'footnote');
-			topA.innerHTML = index;
-			span.parentNode.replaceChild(topA, span);
-			var textDiv = document.createElement("div");
-			var bottomA = document.createElement("a");
-			bottomA.setAttribute('href', '#' + tname);
-			bottomA.setAttribute('name', bname);
-			bottomA.setAttribute('class', 'footnote');
-			bottomA.innerHTML = index;
-			textDiv.appendChild(bottomA);
-			textDiv.appendChild(document.createTextNode(' '));
-			textDiv.appendChild(span);
-			fnSection.appendChild(textDiv);
-			index++;
-		}
-		if (found && !fnsExists)
-			document.body.appendChild(fnSection);
-	}
+   var fnSection = document.getElementById("footnotes");
+   var fnsExists = !!fnSection;
+   if (!fnsExists) {
+      fnSection = document.createElement('div');
+      fnSection.setAttribute('id', 'footnotes');
+   }
+   var fns = document.getElementsByClassName("fn");
+   // copy items to new array that won't be dynamically altered
+   var ar = new Array();
+   var len = fns.length;
+   for ( var i = 0; i < len; i++) {
+   var span = fns[i];
+      ar[i] = span;
+   }
+   var found = false;
+   var index = 1;
+   for ( var i = 0; i < len; i++) {
+      var e = ar[i];
+      if (!e.childNodes.length) continue;
+      found = true;
+      var bname = 'fn' + index + '_bottom';
+      var tname = 'fn' + index + '_top';
+      var topA = document.createElement("a");
+      topA.setAttribute('href', '#' + bname);
+      topA.setAttribute('name', tname);
+      topA.setAttribute('class', 'footnote');
+      topA.innerHTML = index;
+      e.parentNode.replaceChild(topA, e);
+      var textDiv = document.createElement("div");
+      var bottomA = document.createElement("a");
+      bottomA.setAttribute('href', '#' + tname);
+      bottomA.setAttribute('name', bname);
+      bottomA.setAttribute('class', 'footnote');
+      bottomA.innerHTML = index;
+      textDiv.appendChild(bottomA);
+      textDiv.appendChild(document.createTextNode(' '));
+      while ( e.childNodes.length ) {
+         textDiv.appendChild(e.firstChild);
+      }
+      fnSection.appendChild(textDiv);
+      index++;
+   }
+   if (found && !fnsExists) document.body.appendChild(fnSection);
 };
 
 /**
@@ -112,34 +111,32 @@ dfh.footnotes = function() {
  *            page title base
  */
 dfh.headers = function(self, base) {
-	document.title = base + " :: " + self;
-	var div = document.createElement("div");
-	div.setAttribute("style",
-			"margin: 1.5em auto; text-align: center; white-space: nowrap");
-	var nonInitial = false;
-	for ( var key in hdrs) {
-		if (nonInitial) {
-			var span = document.createElement("span");
-			span.setAttribute('style', "margin: 0 1em");
-			span.appendChild(document.createTextNode("|"));
-			div.appendChild(span);
-		} else
-			nonInitial = true;
-		var e;
-		if (key == self)
-			e = document.createTextNode(key);
-		else {
-			var a = document.createElement("a");
-			a.setAttribute("href", hdrs[key]);
-			a.appendChild(document.createTextNode(key));
-			e = a;
-		}
-		div.appendChild(e);
-	}
-	if (document.body.childNodes.length)
-		document.body.insertBefore(div, document.body.firstChild);
-	else
-		document.body.appendChild(div);
+   document.title = base + " :: " + self;
+   var div = document.createElement("div");
+   div.setAttribute("style",
+   "margin: 1.5em auto; text-align: center; white-space: nowrap");
+   var nonInitial = false;
+   for ( var key in hdrs) {
+      if (nonInitial) {
+         var span = document.createElement("span");
+         span.setAttribute('style', "margin: 0 1em");
+         span.appendChild(document.createTextNode("|"));
+         div.appendChild(span);
+      } else nonInitial = true;
+      var e;
+      if (key === self) e = document.createTextNode(key);
+      else {
+         var a = document.createElement("a");
+         a.setAttribute("href", hdrs[key]);
+         a.appendChild(document.createTextNode(key));
+         e = a;
+      }
+      div.appendChild(e);
+   }
+   if (document.body.childNodes.length)
+      document.body.insertBefore(div, document.body.firstChild);
+   else
+      document.body.appendChild(div);
 };
 
 /**
@@ -147,35 +144,35 @@ dfh.headers = function(self, base) {
  * and replaces it with the version value.
  */
 dfh.version = function() {
-	// only proceed if the version variable has been set
-	if (version) {
-		var regex = /__VERSION__/g;
-		var recReplace = function(n) {
-			if (n.nodeType == 3) { // text
-				if (regex.test(n.data)) {
-					var replacement = n.data.replace(regex, version);
-					var t = document.createTextNode(replacement);
-					n.parentNode.insertBefore(t, n);
-					n.parentNode.removeChild(n);
-				}
-			} else if (n.nodeType == 1) { // element
-				for ( var i = 0; i < n.childNodes.length; i++) {
-					recReplace(n.childNodes[i]);
-				}
-				for (i = 0; i < n.attributes.length; i++) {
-					var a = n.attributes[i];
-					// hack
-					// for some reason, this only works for Firefox if I use
-					// an in-line regex; webkit required me to test the
-					// expression twice but otherwise worked
-					if (/__VERSION__/g.test(a.value)) {
-						a.value = a.value.replace(regex, version);
-					}
-				}
-			}
-		};
-		recReplace(document.body);
-	}
+   // only proceed if the version variable has been set
+   if (version) {
+      var regex = /__VERSION__/g;
+      var recReplace = function(n) {
+         if (n.nodeType === 3) { // text
+            if (regex.test(n.data)) {
+               var replacement = n.data.replace(regex, version);
+               var t = document.createTextNode(replacement);
+               n.parentNode.insertBefore(t, n);
+               n.parentNode.removeChild(n);
+            }
+         } else if (n.nodeType === 1) { // element
+            for ( var i = 0; i < n.childNodes.length; i++) {
+               recReplace(n.childNodes[i]);
+            }
+            for (i = 0; i < n.attributes.length; i++) {
+               var a = n.attributes[i];
+               // hack
+               // for some reason, this only works for Firefox if I use
+               // an in-line regex; webkit required me to test the
+               // expression twice but otherwise worked
+               if (/__VERSION__/g.test(a.value)) {
+                  a.value = a.value.replace(regex, version);
+               }
+            }
+         }
+      };
+      recReplace(document.body);
+   }
 };
 
 /**
@@ -198,46 +195,46 @@ dfh.version = function() {
  * takes you back to the table of contents.
  */
 dfh.toc = function() {
-	var tocSpan = document.getElementById("toc");
-	if (tocSpan) {
-		var re = /\bh\d+\b/i;
-		var n = tocSpan;
-		while (n.parentNode != document.body)
-			n = n.parentNode;
-		var tocDiv = document.createElement("div");
-		tocDiv.setAttribute("id", "toc");
-		var tocHeader = document.createElement("h3");
-		tocHeader.setAttribute("style", "text-align:center");
-		tocDiv.appendChild(tocHeader);
-		tocHeader.appendChild(document.createTextNode("Table of Contents"));
-		document.body.insertBefore(tocDiv, tocSpan);
-		while (n) {
-			if (re.test(n.nodeName)) {
-				var indent = n.nodeName.substring(1, n.nodeName.length);
-				indent += 'em';
-				var id = this.stringify(n);
-				id = id.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
-				id = this.makeUnique(id);
-				var tocLine = document.createElement("a");
-				tocLine.setAttribute("style", "display: block; margin-left: "
-						+ indent);
-				tocLine.setAttribute("href", "#" + id);
-				tocDiv.appendChild(tocLine);
-				for ( var i = 0; i < n.childNodes.length; i++)
-					tocLine.appendChild(n.childNodes[i].cloneNode(true));
-				var name = document.createElement("a");
-				name.setAttribute("id", id);
-				document.body.insertBefore(name, n);
-				var top = document.createElement("a");
-				top.setAttribute("href", "#toc");
-				top.setAttribute('class', 'toc_top');
-				top.innerHTML = 'top';
-				n.appendChild(top);
-			}
-			n = n.nextSibling;
-		}
-		document.body.removeChild(tocSpan);
-	}
+   var tocSpan = document.getElementById("toc");
+   if (tocSpan) {
+      var re = /\bh\d+\b/i;
+      var n = tocSpan;
+      while (n.parentNode !== document.body)
+         n = n.parentNode;
+      var tocDiv = document.createElement("div");
+      tocDiv.setAttribute("id", "toc");
+      var tocHeader = document.createElement("h3");
+      tocHeader.setAttribute("style", "text-align:center");
+      tocDiv.appendChild(tocHeader);
+      tocHeader.appendChild(document.createTextNode("Table of Contents"));
+      document.body.insertBefore(tocDiv, tocSpan);
+      while (n) {
+         if (re.test(n.nodeName)) {
+            var indent = n.nodeName.substring(1, n.nodeName.length);
+            indent += 'em';
+            var id = this.stringify(n);
+            id = id.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
+            id = this.makeUnique(id);
+            var tocLine = document.createElement("a");
+            tocLine.setAttribute("style", "display: block; margin-left: "
+            + indent);
+            tocLine.setAttribute("href", "#" + id);
+            tocDiv.appendChild(tocLine);
+            for ( var i = 0; i < n.childNodes.length; i++)
+               tocLine.appendChild(n.childNodes[i].cloneNode(true));
+            var name = document.createElement("a");
+            name.setAttribute("id", id);
+            document.body.insertBefore(name, n);
+            var top = document.createElement("a");
+            top.setAttribute("href", "#toc");
+            top.setAttribute('class', 'toc_top');
+            top.innerHTML = 'top';
+            n.appendChild(top);
+         }
+         n = n.nextSibling;
+      }
+      document.body.removeChild(tocSpan);
+   }
 };
 
 /**
@@ -248,19 +245,19 @@ dfh.toc = function() {
  * @returns anchor name unique within document
  */
 dfh.makeUnique = function(id) {
-	var index = 0;
-	var uid = id;
-	OUTER: while (true) {
-		for ( var i = 0; i < document.anchors.length; i++) {
-			var a = document.anchors[i];
-			if (a.name && a.name == uid) {
-				uid = id + index++;
-				continue OUTER;
-			}
-		}
-		break;
-	}
-	return uid;
+   var index = 0;
+   var uid = id;
+   OUTER: while (true) {
+      for ( var i = 0; i < document.anchors.length; i++) {
+         var a = document.anchors[i];
+         if (a.name && a.name === uid) {
+            uid = id + index++;
+            continue OUTER;
+         }
+      }
+      break;
+   }
+   return uid;
 };
 
 /**
@@ -270,12 +267,12 @@ dfh.makeUnique = function(id) {
  * @returns node text content
  */
 dfh.stringify = function(node) {
-	if (node.nodeType == Node.TEXT_NODE)
-		return node.data;
-	var id = "";
-	for ( var i = 0; i < node.childNodes.length; i++)
-		id += this.stringify(node.childNodes[i]);
-	return id;
+   if (node.nodeType === Node.TEXT_NODE)
+      return node.data;
+   var id = "";
+   for ( var i = 0; i < node.childNodes.length; i++)
+      id += this.stringify(node.childNodes[i]);
+   return id;
 };
 
 /**
@@ -283,40 +280,41 @@ dfh.stringify = function(node) {
  * only -- is transformed, not ---, etc.
  */
 dfh.mdash = function() {
-	var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ALL,
-			function(node) {
-				if (node.tagName == "PRE" || node.tagName == "CODE")
-					return NodeFilter.FILTER_REJECT;
-				return NodeFilter.FILTER_ACCEPT;
-			}, false);
-	while (walker.nextNode()) {
-		if (walker.currentNode.nodeType == 3
-				&& /--/.test(walker.currentNode.nodeValue)) {
-			var n = walker.currentNode;
-			var str = n.nodeValue;
-			str = str.replace(/(^|[^-])--(?!-)/mg, '$1\u2014');
-			n.nodeValue = str;
-		}
-	}
+   var walker = document.createTreeWalker(
+      document.body, NodeFilter.SHOW_ALL,
+      function(node) {
+         if (node.tagName === "PRE" || node.tagName === "CODE")
+            return NodeFilter.FILTER_REJECT;
+         return NodeFilter.FILTER_ACCEPT;
+      }, false
+   );
+   while (walker.nextNode()) {
+      if (walker.currentNode.nodeType === 3 && /--/.test(walker.currentNode.nodeValue)) {
+         var n = walker.currentNode;
+         var str = n.nodeValue;
+         str = str.replace(/(^|[^-])--(?!-)/mg, '$1\u2014');
+         n.nodeValue = str;
+      }
+   }
 };
 
 /**
  * Makes all external links open in a new window.
  */
 dfh.elinks = function(pattern) {
-	if (pattern == undefined) {
-		pattern = /^https?:\/\//i;
-	} else if (typeof (pattern) == 'string') {
-		pattern = new RegExp(pattern);
-	}
-	var walker = document.createTreeWalker(document.body,
-			NodeFilter.SHOW_ELEMENT, null, false);
-	while (walker.nextNode()) {
-		if (walker.currentNode.tagName == 'A') {
-			var n = walker.currentNode;
-			if (pattern.test(n.getAttribute("href"))) {
-				n.setAttribute("target", "_blank");
-			}
-		}
-	}
+   if (pattern === undefined) {
+      pattern = /^https?:\/\//i;
+   } else if (typeof pattern === 'string') {
+      pattern = new RegExp(pattern);
+   }
+   var walker = document.createTreeWalker(document.body,
+   NodeFilter.SHOW_ELEMENT, null, false);
+   while (walker.nextNode()) {
+      if (walker.currentNode.tagName === 'A') {
+         var n = walker.currentNode;
+         if (pattern.test(n.getAttribute("href"))) {
+            n.setAttribute("target", "_blank");
+         }
+      }
+   }
 };
